@@ -8,6 +8,7 @@ interface LoginViewProps {
 }
 
 export const LoginView: React.FC<LoginViewProps> = ({ onSuccess }) => {
+  const school = dbService.schoolProfile;
   const [email, setEmail] = useState('guru.wali@smkn1jember.sch.id');
   const [password, setPassword] = useState('••••••••');
   const [errorMsg, setErrorMsg] = useState('');
@@ -46,16 +47,16 @@ export const LoginView: React.FC<LoginViewProps> = ({ onSuccess }) => {
       <div className="sm:mx-auto sm:w-full sm:max-w-md relative z-10 text-center space-y-2">
         <div className="w-20 h-20 mx-auto rounded-full bg-white p-1 shadow-xl ring-4 ring-blue-500/20">
           <img
-            src="/logo-smkn1-jember.png"
-            alt="Logo SMK Negeri 1 Jember"
+            src={school.logo_url || '/logo-smkn1-jember.png'}
+            alt={`Logo ${school.nama_sekolah}`}
             className="w-full h-full object-contain rounded-full"
           />
         </div>
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-950/80 border border-blue-800/80 text-blue-300 text-xs font-semibold">
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-950/80 border border-blue-800/80 text-blue-300 text-xs font-semibold uppercase">
           <Sparkles className="w-3.5 h-3.5" />
-          <span>SMK NEGERI 1 JEMBER</span>
+          <span>{school.nama_sekolah}</span>
         </div>
-        <h1 className="text-3xl font-extrabold text-white tracking-tight">SIMPEL SMESA</h1>
+        <h1 className="text-3xl font-extrabold text-white tracking-tight">{school.nama_aplikasi}</h1>
         <p className="text-xs text-slate-300 font-medium">
           Sistem Informasi Monitoring, Pendampingan, dan Evaluasi Siswa
         </p>

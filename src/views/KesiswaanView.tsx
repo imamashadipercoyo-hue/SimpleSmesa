@@ -6,6 +6,7 @@ import { ShieldAlert, Plus, AlertTriangle, FileText, Printer, CheckCircle, Clock
 
 export const KesiswaanView: React.FC = () => {
   const profile = dbService.currentUser;
+  const school = dbService.schoolProfile;
   const isKesiswaan = profile.role_kode === 'kesiswaan' || profile.role_kode === 'admin' || profile.role_kode === 'waka_kesiswaan';
 
   const [activeTab, setActiveTab] = useState<'pelanggaran' | 'pembinaan' | 'tatib' | 'surat' | 'kontrak' | 'keterlambatan'>('pelanggaran');
@@ -378,26 +379,26 @@ export const KesiswaanView: React.FC = () => {
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200 pb-3">
               <div className="flex items-center gap-3.5">
                 <img
-                  src="/logo-smkn1-jember.png"
-                  alt="Logo SMK Negeri 1 Jember"
+                  src={school.logo_url || '/logo-smkn1-jember.png'}
+                  alt={`Logo ${school.nama_sekolah}`}
                   className="w-12 h-12 object-contain shrink-0"
                 />
                 <div>
                   <span className="text-[11px] font-bold text-blue-700 tracking-wider uppercase block">
-                    Pemerintah Provinsi Jawa Timur · Dinas Pendidikan
+                    {school.instansi_induk}
                   </span>
                   <h3 className="text-lg font-extrabold text-slate-900 tracking-tight">
                     SKORING TATA TERTIB SEKOLAH (DOKUMEN RESMI BAKU)
                   </h3>
                   <span className="text-xs text-slate-600 block">
-                    SMK Negeri 1 Jember · Jalan Jambu Nomor 17 Jember (0331) 429690
+                    {school.nama_sekolah} · {school.alamat}, {school.kota} {school.telepon}
                   </span>
                 </div>
               </div>
-              <div className="text-left sm:text-right sm:border-l sm:pl-4 border-slate-200 text-xs">
-                <span className="font-semibold text-slate-800 block">Ditetapkan: Jember, 3 Agustus 2026</span>
-                <span className="text-slate-600 block">Kepala Sekolah: <strong>SRI HARTATIK, M.Pd.</strong></span>
-                <span className="text-[11px] text-slate-500 font-mono block">NIP. 196809102000122003</span>
+              <div className="text-left sm:text-right sm:border-l sm:pl-4 border-slate-200 text-xs space-y-0.5">
+                <span className="font-semibold text-slate-800 block">Kepala Sekolah: <strong>{school.kepala_sekolah_nama}</strong></span>
+                <span className="text-[11px] text-slate-500 font-mono block">NIP. {school.kepala_sekolah_nip}</span>
+                <span className="text-slate-600 block pt-0.5">Waka Kesiswaan: <strong>{school.waka_kesiswaan_nama}</strong></span>
               </div>
             </div>
 
@@ -681,7 +682,7 @@ export const KesiswaanView: React.FC = () => {
           <div className="bg-white p-5 rounded-lg border border-slate-200 flex items-center justify-between">
             <div>
               <h3 className="text-sm font-bold text-slate-900">Format Resmi Surat Panggilan Orang Tua</h3>
-              <p className="text-xs text-slate-500">Terbitkan surat pemanggilan resmi berkop SMKN 1 Jember</p>
+              <p className="text-xs text-slate-500">Terbitkan surat pemanggilan resmi berkop {school.nama_sekolah}</p>
             </div>
             <button
               onClick={() => setShowModalSurat(true)}
@@ -693,18 +694,25 @@ export const KesiswaanView: React.FC = () => {
           </div>
 
           {/* Sample template view */}
-          <div className="bg-white p-8 rounded-lg border border-slate-300 shadow-sm max-w-3xl mx-auto space-y-6 text-xs text-slate-800">
+          <div className="bg-white p-6 sm:p-8 rounded-lg border border-slate-300 shadow-sm max-w-3xl mx-auto space-y-6 text-xs text-slate-800">
             {/* Header Kop */}
             <div className="flex items-center justify-center gap-4 border-b-2 border-slate-900 pb-4">
               <img
-                src="/logo-smkn1-jember.png"
-                alt="Logo SMK Negeri 1 Jember"
+                src={school.logo_url || '/logo-smkn1-jember.png'}
+                alt={`Logo ${school.nama_sekolah}`}
                 className="w-14 h-14 object-contain shrink-0"
               />
               <div className="text-center">
-                <span className="font-bold text-sm tracking-wide block uppercase">Pemerintah Provinsi Jawa Timur · Dinas Pendidikan</span>
-                <span className="font-extrabold text-base tracking-wider block uppercase">SMK NEGERI 1 JEMBER</span>
-                <span className="text-[11px] text-slate-600 block">Jalan Jambu Nomor 17 Telp. (0331) 429690 Jember 68111</span>
+                <span className="font-bold text-sm tracking-wide block uppercase">{school.instansi_induk}</span>
+                <span className="font-extrabold text-base tracking-wider block uppercase">{school.nama_sekolah}</span>
+                <span className="text-[11px] text-slate-600 block">
+                  {school.alamat} Telp. {school.telepon} {school.kota} {school.kode_pos}
+                </span>
+                {(school.email || school.website) && (
+                  <span className="text-[10px] text-slate-500 block">
+                    {[school.email && `Email: ${school.email}`, school.website && `Web: ${school.website}`].filter(Boolean).join(' · ')}
+                  </span>
+                )}
               </div>
             </div>
 
@@ -715,7 +723,7 @@ export const KesiswaanView: React.FC = () => {
                 <div>Perihal: <strong>Panggilan Orang Tua / Wali Siswa</strong></div>
               </div>
               <div className="text-right">
-                Jember, 22 Februari 2026
+                {school.kota}, 22 Februari 2026
               </div>
             </div>
 
@@ -727,13 +735,13 @@ export const KesiswaanView: React.FC = () => {
 
             <p className="leading-relaxed">
               Dengan hormat,<br />
-              Sehubungan dengan perkembangan kedisiplinan dan pembinaan belajar putra/putri Bapak/Ibu di SMK Negeri 1 Jember, kami mengharap kehadiran Bapak/Ibu pada:
+              Sehubungan dengan perkembangan kedisiplinan dan pembinaan belajar putra/putri Bapak/Ibu di {school.nama_sekolah}, kami mengharap kehadiran Bapak/Ibu pada:
             </p>
 
             <div className="pl-6 space-y-1">
               <div>Hari / Tanggal : <strong>Kamis, 26 Februari 2026</strong></div>
               <div>Pukul : <strong>09.00 WIB</strong></div>
-              <div>Tempat : Ruang Sidang Kesiswaan & Bimbingan Konseling SMKN 1 Jember</div>
+              <div>Tempat : Ruang Sidang Kesiswaan & Bimbingan Konseling {school.nama_sekolah}</div>
               <div>Keperluan : Sidang Pembinaan Terpadu & Kesepakatan Kontrak Disiplin Siswa</div>
             </div>
 
@@ -741,12 +749,26 @@ export const KesiswaanView: React.FC = () => {
               Mengingat pentingnya agenda tersebut demi kelanjutan studi putra/putri Bapak/Ibu, dimohon kehadiran Bapak/Ibu tepat waktu tanpa diwakilkan. Atas perhatian dan kerja sama yang baik, kami sampaikan terima kasih.
             </p>
 
-            <div className="flex justify-end pt-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-6">
               <div className="text-center">
-                <span>Koordinator Tim Kesiswaan,</span>
+                <span className="block">Mengetahui,</span>
+                <span className="block font-semibold">Kepala Sekolah</span>
                 <div className="h-16" />
-                <span className="font-bold underline block">Agus Prasetyo, S.Pd</span>
-                <span className="text-[11px]">NIP. 198311282009021004</span>
+                <span className="font-bold underline block">{school.kepala_sekolah_nama}</span>
+                <span className="text-[11px] block">NIP. {school.kepala_sekolah_nip}</span>
+                {school.kepala_sekolah_pangkat && (
+                  <span className="text-[10px] text-slate-500 block">{school.kepala_sekolah_pangkat}</span>
+                )}
+              </div>
+              <div className="text-center">
+                <span className="block">{school.kota}, 22 Februari 2026</span>
+                <span className="block font-semibold">Wakil Kepala Sekolah Bid. Kesiswaan</span>
+                <div className="h-16" />
+                <span className="font-bold underline block">{school.waka_kesiswaan_nama}</span>
+                <span className="text-[11px] block">NIP. {school.waka_kesiswaan_nip}</span>
+                {school.waka_kesiswaan_pangkat && (
+                  <span className="text-[10px] text-slate-500 block">{school.waka_kesiswaan_pangkat}</span>
+                )}
               </div>
             </div>
           </div>
@@ -761,7 +783,7 @@ export const KesiswaanView: React.FC = () => {
               <div>
                 <div className="flex items-center gap-2">
                   <span className="px-2 py-0.5 rounded text-[10px] font-bold tracking-wider bg-rose-500/30 text-rose-200 border border-rose-400/30 uppercase">
-                    SMK Negeri 1 Jember
+                    {school.nama_sekolah}
                   </span>
                   <span className="text-[11px] text-rose-200 flex items-center gap-1 font-medium">
                     <Lock className="w-3 h-3 text-amber-400" />

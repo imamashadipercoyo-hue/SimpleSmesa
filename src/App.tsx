@@ -12,6 +12,7 @@ import { KoordinasiView } from './views/KoordinasiView';
 import { PrestasiOrganisasiView } from './views/PrestasiOrganisasiView';
 import { LaporanView } from './views/LaporanView';
 import { MasterDataView } from './views/MasterDataView';
+import { SchoolProfileView } from './views/SchoolProfileView';
 import { SupabaseConfigView } from './views/SupabaseConfigView';
 import { ShieldAlert, ArrowLeft } from 'lucide-react';
 
@@ -49,6 +50,7 @@ export default function App() {
         return ['admin', 'kesiswaan', 'waka_kesiswaan', 'kepala_sekolah'].includes(role);
       case 'master-data':
         return ['admin'].includes(role);
+      case 'school-profile':
       case 'supabase-config':
         return ['admin', 'waka_kesiswaan', 'kepala_sekolah'].includes(role);
       default:
@@ -101,6 +103,8 @@ export default function App() {
         return <LaporanView />;
       case 'master-data':
         return <MasterDataView />;
+      case 'school-profile':
+        return <SchoolProfileView />;
       case 'supabase-config':
         return <SupabaseConfigView />;
       default:

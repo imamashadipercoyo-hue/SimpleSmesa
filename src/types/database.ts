@@ -494,3 +494,26 @@ export interface Notification {
   dibaca: boolean;
   created_at: string;
 }
+
+// 32. Profil Sekolah (Pengaturan Identitas, Alamat, Kepala Sekolah, Waka Kesiswaan)
+export interface SchoolProfile {
+  nama_sekolah: string;
+  nama_aplikasi: string;
+  npsn: string;
+  instansi_induk: string;
+  alamat: string;
+  kota: string;
+  provinsi: string;
+  kode_pos: string;
+  telepon: string;
+  email: string;
+  website: string;
+  logo_url: string;
+  kepala_sekolah_nama: string;
+  kepala_sekolah_nip: string;
+  kepala_sekolah_pangkat: string;
+  waka_kesiswaan_nama: string;
+  waka_kesiswaan_nip: string;
+  waka_kesiswaan_pangkat: string;
+  updated_at: string;
+}

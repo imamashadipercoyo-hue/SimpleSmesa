@@ -31,7 +31,8 @@ import {
   UserRole,
   FasePenangananTatib,
   PenghargaanSkorTatib,
-  AcuanSkorBawaan
+  AcuanSkorBawaan,
+  SchoolProfile
 } from '../types/database';
 
 import {
@@ -88,7 +89,30 @@ function setStoredItem<T>(key: string, value: T): void {
   }
 }
 
+export const DEFAULT_SCHOOL_PROFILE: SchoolProfile = {
+  nama_sekolah: 'SMK Negeri 1 Jember',
+  nama_aplikasi: 'SIMPEL SMESA',
+  npsn: '20523850',
+  instansi_induk: 'Pemerintah Provinsi Jawa Timur · Dinas Pendidikan',
+  alamat: 'Jalan Jambu Nomor 17',
+  kota: 'Jember',
+  provinsi: 'Jawa Timur',
+  kode_pos: '68111',
+  telepon: '(0331) 429690',
+  email: 'info@smkn1jember.sch.id',
+  website: 'https://smkn1jember.sch.id',
+  logo_url: '/logo-smkn1-jember.png',
+  kepala_sekolah_nama: 'SRI HARTATIK, M.Pd.',
+  kepala_sekolah_nip: '196809102000122003',
+  kepala_sekolah_pangkat: 'Pembina Utama Muda / IVc',
+  waka_kesiswaan_nama: 'Rina Puspitasari, S.Pd., M.M.',
+  waka_kesiswaan_nip: '197408221999032001',
+  waka_kesiswaan_pangkat: 'Pembina / IVa',
+  updated_at: new Date().toISOString()
+};
+
 type SyncCollectionKey =
+  | 'profil_sekolah'
   | 'roles'
   | 'profiles'
   | 'guru'
@@ -117,6 +141,7 @@ type SyncCollectionKey =
   | 'notifications';
 
 const ALL_SYNC_KEYS: SyncCollectionKey[] = [
+  'profil_sekolah',
   'roles',
   'profiles',
   'guru',
@@ -163,6 +188,7 @@ class SimpelSmesaService {
   public isRealtimeSubscribed: boolean = false;
 
   // Active state
+  public schoolProfile: SchoolProfile;
   public currentUser: Profile;
   public roles: Role[];
   public profiles: Profile[];
@@ -211,6 +237,8 @@ class SimpelSmesaService {
     this.lastSyncedAt = getStoredItem<string | null>('sb_last_synced', null);
 
     // Initialize databases from storage or seeds FIRST before starting cloud sync
+    const savedSchool = getStoredItem<Partial<SchoolProfile> | null>('profil_sekolah', null);
+    this.schoolProfile = { ...DEFAULT_SCHOOL_PROFILE, ...(savedSchool || {}) };
     this.roles = getStoredItem<Role[]>('roles', SEED_ROLES);
     this.profiles = getStoredItem<Profile[]>('profiles', SEED_PROFILES);
     this.guruList = getStoredItem<Guru[]>('guru', SEED_GURU);
@@ -438,6 +466,7 @@ class SimpelSmesaService {
   // --------------------------------------------------------------------------
   private getCollectionData(key: SyncCollectionKey): unknown {
     switch (key) {
+      case 'profil_sekolah': return this.schoolProfile;
       case 'roles': return this.roles;
       case 'profiles': return this.profiles;
       case 'guru': return this.guruList;
@@ -468,6 +497,14 @@ class SimpelSmesaService {
   }
 
   private applyRemoteCollection(key: SyncCollectionKey, payload: unknown): boolean {
+    if (key === 'profil_sekolah') {
+      if (payload && typeof payload === 'object' && !Array.isArray(payload)) {
+        this.schoolProfile = { ...DEFAULT_SCHOOL_PROFILE, ...(payload as Partial<SchoolProfile>) };
+        setStoredItem(key, this.schoolProfile);
+        return true;
+      }
+      return false;
+    }
     if (!Array.isArray(payload)) return false;
     switch (key) {
       case 'roles': this.roles = payload as Role[]; break;
@@ -502,6 +539,29 @@ class SimpelSmesaService {
     }
     setStoredItem(key, payload);
     return true;
+  }
+
+  public updateSchoolProfile(updates: Partial<SchoolProfile>): SchoolProfile {
+    this.schoolProfile = {
+      ...this.schoolProfile,
+      ...updates,
+      updated_at: new Date().toISOString()
+    };
+    this.persist('profil_sekolah', this.schoolProfile);
+    this.logAudit(
+      'UPDATE',
+      'profil_sekolah',
+      null,
+      `Profil sekolah diperbarui (${this.schoolProfile.nama_sekolah} · Kepsek: ${this.schoolProfile.kepala_sekolah_nama} · Waka Kesiswaan: ${this.schoolProfile.waka_kesiswaan_nama})`
+    );
+    return this.schoolProfile;
+  }
+
+  public resetSchoolProfile(): SchoolProfile {
+    this.schoolProfile = { ...DEFAULT_SCHOOL_PROFILE, updated_at: new Date().toISOString() };
+    this.persist('profil_sekolah', this.schoolProfile);
+    this.logAudit('UPDATE', 'profil_sekolah', null, 'Profil sekolah dikembalikan ke pengaturan default SMK Negeri 1 Jember');
+    return this.schoolProfile;
   }
 
   private startRealtimeSync(): void {
@@ -679,7 +739,7 @@ class SimpelSmesaService {
       let updatedCount = 0;
       for (const row of data) {
         const key = row.collection_key as SyncCollectionKey;
-        if (ALL_SYNC_KEYS.includes(key) && Array.isArray(row.payload)) {
+        if (ALL_SYNC_KEYS.includes(key) && row.payload != null) {
           if (this.applyRemoteCollection(key, row.payload)) {
             updatedCount++;
           }

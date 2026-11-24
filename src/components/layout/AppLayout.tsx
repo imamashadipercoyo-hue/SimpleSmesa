@@ -25,7 +25,8 @@ import {
   Sparkles,
   CheckCircle2,
   Lock,
-  Command
+  Command,
+  Building2
 } from 'lucide-react';
 
 interface AppLayoutProps {
@@ -81,6 +82,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
   }, []);
 
   const profile = dbService.currentUser;
+  const school = dbService.schoolProfile;
   const role = profile.role_kode;
   const unreadNotifs = dbService.notifications.filter(n => !n.dibaca);
 
@@ -129,6 +131,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
     { id: 'prestasi', label: 'Prestasi & OSIS', icon: Award, category: 'layanan' },
     { id: 'laporan', label: 'Pusat Laporan', icon: FileText, category: 'manajemen' },
     { id: 'master-data', label: 'Data Master', icon: Layers, roles: ['admin'], category: 'manajemen' },
+    { id: 'school-profile', label: 'Profil Sekolah', icon: Building2, roles: ['admin', 'waka_kesiswaan', 'kepala_sekolah'], category: 'manajemen' },
     { id: 'supabase-config', label: 'Supabase & SQL', icon: Database, roles: ['admin', 'waka_kesiswaan', 'kepala_sekolah'], category: 'manajemen' },
   ];
 
@@ -175,15 +178,15 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
                 className="w-11 h-11 rounded-full bg-white/95 p-0.5 flex items-center justify-center shadow-md hover:scale-105 active:scale-95 transition-all ring-2 ring-blue-400/40 cursor-pointer"
               >
                 <img
-                  src="/logo-smkn1-jember.png"
-                  alt="Logo SMK Negeri 1 Jember"
+                  src={school.logo_url || '/logo-smkn1-jember.png'}
+                  alt={`Logo ${school.nama_sekolah}`}
                   className="w-full h-full object-contain rounded-full"
                 />
               </button>
               {/* Tooltip */}
               <div className="absolute left-full ml-3 top-1/2 -translate-y-1/2 z-50 pointer-events-none hidden group-hover:flex items-center">
                 <div className="bg-slate-950 text-white text-xs font-semibold px-3 py-1.5 rounded-lg shadow-xl border border-slate-700 whitespace-nowrap">
-                  SIMPEL SMESA · Klik untuk perluas
+                  {school.nama_aplikasi} · Klik untuk perluas
                 </div>
               </div>
             </div>
@@ -192,17 +195,17 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
               <div className="flex items-center gap-3 min-w-0">
                 <div className="w-10 h-10 rounded-full bg-white/95 p-0.5 flex items-center justify-center shadow-sm shrink-0 ring-2 ring-blue-400/30">
                   <img
-                    src="/logo-smkn1-jember.png"
-                    alt="Logo SMK Negeri 1 Jember"
+                    src={school.logo_url || '/logo-smkn1-jember.png'}
+                    alt={`Logo ${school.nama_sekolah}`}
                     className="w-full h-full object-contain rounded-full"
                   />
                 </div>
                 <div className="min-w-0">
                   <h1 className="text-sm font-bold text-white tracking-tight truncate leading-none">
-                    SIMPEL SMESA
+                    {school.nama_aplikasi}
                   </h1>
                   <span className="text-[10px] text-blue-300 font-medium tracking-wide uppercase block mt-1 truncate">
-                    SMK Negeri 1 Jember
+                    {school.nama_sekolah}
                   </span>
                 </div>
               </div>
@@ -496,17 +499,17 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
           >
             <Menu className="w-5 h-5" />
           </button>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 min-w-0">
             <div className="w-8 h-8 rounded-full bg-white/95 p-0.5 shrink-0 ring-1 ring-blue-400/30">
               <img
-                src="/logo-smkn1-jember.png"
-                alt="Logo SMK Negeri 1 Jember"
+                src={school.logo_url || '/logo-smkn1-jember.png'}
+                alt={`Logo ${school.nama_sekolah}`}
                 className="w-full h-full object-contain rounded-full"
               />
             </div>
-            <div>
-              <h1 className="text-xs font-bold text-white tracking-tight leading-none">SIMPEL SMESA</h1>
-              <span className="text-[10px] text-blue-300">SMKN 1 Jember</span>
+            <div className="min-w-0">
+              <h1 className="text-xs font-bold text-white tracking-tight leading-none truncate">{school.nama_aplikasi}</h1>
+              <span className="text-[10px] text-blue-300 block truncate">{school.nama_sekolah}</span>
             </div>
           </div>
         </div>
@@ -546,17 +549,17 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
           {/* Drawer Body */}
           <div className="relative w-4/5 max-w-xs bg-slate-900 border-r border-slate-800 flex flex-col h-full z-10">
             <div className="p-4 border-b border-slate-800 flex items-center justify-between">
-              <div className="flex items-center gap-2.5">
+              <div className="flex items-center gap-2.5 min-w-0">
                 <div className="w-9 h-9 rounded-full bg-white/95 p-0.5 shrink-0 ring-1 ring-blue-400/30">
                   <img
-                    src="/logo-smkn1-jember.png"
-                    alt="Logo SMK Negeri 1 Jember"
+                    src={school.logo_url || '/logo-smkn1-jember.png'}
+                    alt={`Logo ${school.nama_sekolah}`}
                     className="w-full h-full object-contain rounded-full"
                   />
                 </div>
-                <div>
-                  <h2 className="text-sm font-bold text-white">SIMPEL SMESA</h2>
-                  <span className="text-[10px] text-blue-300">SMK Negeri 1 Jember</span>
+                <div className="min-w-0">
+                  <h2 className="text-sm font-bold text-white truncate">{school.nama_aplikasi}</h2>
+                  <span className="text-[10px] text-blue-300 block truncate">{school.nama_sekolah}</span>
                 </div>
               </div>
               <button
@@ -635,9 +638,11 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
               {isCollapsed ? <PanelLeftOpen className="w-4 h-4 text-blue-600" /> : <PanelLeftClose className="w-4 h-4" />}
             </button>
             <div className="flex items-center gap-2">
-              <span>SMK Negeri 1 Jember</span>
+              <span>{school.nama_sekolah}</span>
               <span aria-hidden="true">/</span>
-              <span className="text-slate-900 font-semibold capitalize">{currentView.replace('-', ' ')}</span>
+              <span className="text-slate-900 font-semibold">
+                {navItems.find(n => n.id === currentView)?.label || currentView.replace(/-/g, ' ')}
+              </span>
             </div>
           </div>
 
