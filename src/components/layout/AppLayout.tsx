@@ -172,9 +172,13 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
               <button
                 onClick={toggleCollapse}
                 title="Perluas Sidebar (Ctrl+B)"
-                className="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center text-white font-black text-sm tracking-tighter shadow-md hover:scale-105 active:scale-95 transition-all ring-1 ring-blue-400/30 cursor-pointer"
+                className="w-11 h-11 rounded-full bg-white/95 p-0.5 flex items-center justify-center shadow-md hover:scale-105 active:scale-95 transition-all ring-2 ring-blue-400/40 cursor-pointer"
               >
-                SM
+                <img
+                  src="/logo-smkn1-jember.png"
+                  alt="Logo SMK Negeri 1 Jember"
+                  className="w-full h-full object-contain rounded-full"
+                />
               </button>
               {/* Tooltip */}
               <div className="absolute left-full ml-3 top-1/2 -translate-y-1/2 z-50 pointer-events-none hidden group-hover:flex items-center">
@@ -186,8 +190,12 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
           ) : (
             <>
               <div className="flex items-center gap-3 min-w-0">
-                <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center text-white font-black text-sm tracking-tighter shadow-sm shrink-0 ring-1 ring-blue-400/20">
-                  SM
+                <div className="w-10 h-10 rounded-full bg-white/95 p-0.5 flex items-center justify-center shadow-sm shrink-0 ring-2 ring-blue-400/30">
+                  <img
+                    src="/logo-smkn1-jember.png"
+                    alt="Logo SMK Negeri 1 Jember"
+                    className="w-full h-full object-contain rounded-full"
+                  />
                 </div>
                 <div className="min-w-0">
                   <h1 className="text-sm font-bold text-white tracking-tight truncate leading-none">
@@ -488,9 +496,18 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
           >
             <Menu className="w-5 h-5" />
           </button>
-          <div>
-            <h1 className="text-xs font-bold text-white tracking-tight leading-none">SIMPEL SMESA</h1>
-            <span className="text-[10px] text-blue-300">SMKN 1 Jember</span>
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-full bg-white/95 p-0.5 shrink-0 ring-1 ring-blue-400/30">
+              <img
+                src="/logo-smkn1-jember.png"
+                alt="Logo SMK Negeri 1 Jember"
+                className="w-full h-full object-contain rounded-full"
+              />
+            </div>
+            <div>
+              <h1 className="text-xs font-bold text-white tracking-tight leading-none">SIMPEL SMESA</h1>
+              <span className="text-[10px] text-blue-300">SMKN 1 Jember</span>
+            </div>
           </div>
         </div>
 
@@ -529,9 +546,18 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
           {/* Drawer Body */}
           <div className="relative w-4/5 max-w-xs bg-slate-900 border-r border-slate-800 flex flex-col h-full z-10">
             <div className="p-4 border-b border-slate-800 flex items-center justify-between">
-              <div>
-                <h2 className="text-sm font-bold text-white">SIMPEL SMESA</h2>
-                <span className="text-[10px] text-blue-300">SMK Negeri 1 Jember</span>
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-full bg-white/95 p-0.5 shrink-0 ring-1 ring-blue-400/30">
+                  <img
+                    src="/logo-smkn1-jember.png"
+                    alt="Logo SMK Negeri 1 Jember"
+                    className="w-full h-full object-contain rounded-full"
+                  />
+                </div>
+                <div>
+                  <h2 className="text-sm font-bold text-white">SIMPEL SMESA</h2>
+                  <span className="text-[10px] text-blue-300">SMK Negeri 1 Jember</span>
+                </div>
               </div>
               <button
                 onClick={() => setMobileMenuOpen(false)}

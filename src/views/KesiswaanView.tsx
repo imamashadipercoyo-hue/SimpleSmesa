@@ -376,16 +376,23 @@ export const KesiswaanView: React.FC = () => {
           {/* Official Letterhead Header */}
           <div className="bg-white p-6 rounded-lg border border-slate-200 shadow-xs space-y-3">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200 pb-3">
-              <div>
-                <span className="text-[11px] font-bold text-blue-700 tracking-wider uppercase block">
-                  Pemerintah Provinsi Jawa Timur · Dinas Pendidikan
-                </span>
-                <h3 className="text-lg font-extrabold text-slate-900 tracking-tight">
-                  SKORING TATA TERTIB SEKOLAH (DOKUMEN RESMI BAKU)
-                </h3>
-                <span className="text-xs text-slate-600 block">
-                  SMK Negeri 1 Jember · Jalan Jambu Nomor 17 Jember (0331) 429690
-                </span>
+              <div className="flex items-center gap-3.5">
+                <img
+                  src="/logo-smkn1-jember.png"
+                  alt="Logo SMK Negeri 1 Jember"
+                  className="w-12 h-12 object-contain shrink-0"
+                />
+                <div>
+                  <span className="text-[11px] font-bold text-blue-700 tracking-wider uppercase block">
+                    Pemerintah Provinsi Jawa Timur · Dinas Pendidikan
+                  </span>
+                  <h3 className="text-lg font-extrabold text-slate-900 tracking-tight">
+                    SKORING TATA TERTIB SEKOLAH (DOKUMEN RESMI BAKU)
+                  </h3>
+                  <span className="text-xs text-slate-600 block">
+                    SMK Negeri 1 Jember · Jalan Jambu Nomor 17 Jember (0331) 429690
+                  </span>
+                </div>
               </div>
               <div className="text-left sm:text-right sm:border-l sm:pl-4 border-slate-200 text-xs">
                 <span className="font-semibold text-slate-800 block">Ditetapkan: Jember, 3 Agustus 2026</span>
@@ -688,10 +695,17 @@ export const KesiswaanView: React.FC = () => {
           {/* Sample template view */}
           <div className="bg-white p-8 rounded-lg border border-slate-300 shadow-sm max-w-3xl mx-auto space-y-6 text-xs text-slate-800">
             {/* Header Kop */}
-            <div className="text-center border-b-2 border-slate-900 pb-4">
-              <span className="font-bold text-sm tracking-wide block uppercase">Pemerintah Provinsi Jawa Timur · Dinas Pendidikan</span>
-              <span className="font-extrabold text-base tracking-wider block uppercase">SMK NEGERI 1 JEMBER</span>
-              <span className="text-[11px] text-slate-600 block">Jalan Panjaitan No. 88 Telp. (0331) 338573 Jember 68121</span>
+            <div className="flex items-center justify-center gap-4 border-b-2 border-slate-900 pb-4">
+              <img
+                src="/logo-smkn1-jember.png"
+                alt="Logo SMK Negeri 1 Jember"
+                className="w-14 h-14 object-contain shrink-0"
+              />
+              <div className="text-center">
+                <span className="font-bold text-sm tracking-wide block uppercase">Pemerintah Provinsi Jawa Timur · Dinas Pendidikan</span>
+                <span className="font-extrabold text-base tracking-wider block uppercase">SMK NEGERI 1 JEMBER</span>
+                <span className="text-[11px] text-slate-600 block">Jalan Jambu Nomor 17 Telp. (0331) 429690 Jember 68111</span>
+              </div>
             </div>
 
             <div className="flex justify-between">

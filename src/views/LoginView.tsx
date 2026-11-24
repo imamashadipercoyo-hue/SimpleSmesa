@@ -44,6 +44,13 @@ export const LoginView: React.FC<LoginViewProps> = ({ onSuccess }) => {
       <div className="absolute bottom-0 -right-40 w-96 h-96 bg-purple-600/10 rounded-full blur-3xl pointer-events-none" />
 
       <div className="sm:mx-auto sm:w-full sm:max-w-md relative z-10 text-center space-y-2">
+        <div className="w-20 h-20 mx-auto rounded-full bg-white p-1 shadow-xl ring-4 ring-blue-500/20">
+          <img
+            src="/logo-smkn1-jember.png"
+            alt="Logo SMK Negeri 1 Jember"
+            className="w-full h-full object-contain rounded-full"
+          />
+        </div>
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-950/80 border border-blue-800/80 text-blue-300 text-xs font-semibold">
           <Sparkles className="w-3.5 h-3.5" />
           <span>SMK NEGERI 1 JEMBER</span>
