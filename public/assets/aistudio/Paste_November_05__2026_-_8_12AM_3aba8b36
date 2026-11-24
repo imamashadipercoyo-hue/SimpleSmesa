@@ -1,0 +1,1935 @@
+# MASTER PROMPT — SUPABASE + AI APP BUILDER
+
+Bangun aplikasi web production-ready bernama:
+
+# SIMPEL SMESA
+### Sistem Informasi Monitoring, Pendampingan, dan Evaluasi Siswa
+**SMK NEGERI 1 JEMBER**
+
+Tagline:
+
+### “Data Terintegrasi • Layanan Terarah • Pembinaan Berkelanjutan”
+
+Aplikasi ini adalah sistem manajemen layanan dan pembinaan siswa yang mengintegrasikan:
+
+1. Guru Wali
+2. Wali Kelas
+3. KKK
+4. Guru BK
+5. Tim Kesiswaan
+
+serta role manajerial:
+
+6. Waka Kesiswaan
+7. Kepala Sekolah
+8. Admin
+
+Gunakan:
+
+- Frontend web modern dan responsif
+- Supabase sebagai backend
+- Supabase Authentication
+- PostgreSQL Database
+- Row Level Security/RLS
+- Supabase Storage
+- Realtime Notification jika diperlukan
+- Audit Log
+- Role-Based Access Control
+
+Jangan membuat lima aplikasi terpisah.
+
+Buat:
+
+# SATU APLIKASI + SATU DATABASE + ROLE-BASED ACCESS
+
+---
+
+# 1. ARSITEKTUR APLIKASI
+
+Gunakan arsitektur:
+
+Frontend
+↓
+Supabase Auth
+↓
+PostgreSQL Database
+↓
+RLS Policy
+↓
+Supabase Storage
+
+Struktur aplikasi:
+
+```text
+SIMPEL SMESA
+│
+├── Authentication
+│
+├── Dashboard
+│
+├── Data Master
+│
+├── Guru Wali
+├── Wali Kelas
+├── KKK
+├── Guru BK
+├── Tim Kesiswaan
+│
+├── Pusat Koordinasi Siswa
+│
+├── Prestasi
+├── OSIS/MPK
+├── Ekstrakurikuler
+│
+├── Laporan
+│
+└── Administrasi
+```
+
+---
+
+# 2. SUPABASE AUTHENTICATION
+
+Gunakan Supabase Auth.
+
+Login menggunakan:
+
+- Email
+- Password
+
+Setelah login:
+
+```text
+Login
+↓
+Supabase Auth
+↓
+Ambil user_id
+↓
+Cari profile pengguna
+↓
+Baca role
+↓
+Baca assignment
+↓
+Redirect ke dashboard sesuai role
+```
+
+Contoh:
+
+```text
+role = guru_wali
+→ /guru-wali/dashboard
+
+role = wali_kelas
+→ /wali-kelas/dashboard
+
+role = kkk
+→ /kkk/dashboard
+
+role = guru_bk
+→ /bk/dashboard
+
+role = kesiswaan
+→ /kesiswaan/dashboard
+
+role = waka_kesiswaan
+→ /waka-kesiswaan/dashboard
+
+role = kepala_sekolah
+→ /kepala-sekolah/dashboard
+
+role = admin
+→ /admin/dashboard
+```
+
+Jangan menyimpan role hanya di frontend.
+
+Role harus divalidasi dari database/RLS.
+
+---
+
+# 3. STRUKTUR USER
+
+Gunakan:
+
+### auth.users
+
+Tabel bawaan Supabase.
+
+Jangan membuat tabel password sendiri.
+
+Buat tabel:
+
+### profiles
+
+Field:
+
+```text
+id UUID PRIMARY KEY REFERENCES auth.users(id)
+nama_lengkap TEXT
+email TEXT
+nip TEXT
+role_id UUID
+guru_id UUID
+aktif BOOLEAN DEFAULT TRUE
+created_at TIMESTAMP
+updated_at TIMESTAMP
+```
+
+---
+
+# 4. TABEL ROLES
+
+### roles
+
+```text
+id UUID PRIMARY KEY
+kode TEXT UNIQUE
+nama TEXT
+deskripsi TEXT
+created_at TIMESTAMP
+```
+
+Data awal:
+
+```text
+admin
+kepala_sekolah
+waka_kesiswaan
+guru_wali
+wali_kelas
+kkk
+guru_bk
+kesiswaan
+```
+
+Jangan menggunakan nama role bebas dari frontend.
+
+Gunakan role dari database.
+
+---
+
+# 5. DATA GURU
+
+### guru
+
+```text
+id UUID PRIMARY KEY
+nip TEXT UNIQUE
+nama_lengkap TEXT
+email TEXT
+no_hp TEXT
+jabatan TEXT
+status_aktif BOOLEAN DEFAULT TRUE
+created_at TIMESTAMP
+updated_at TIMESTAMP
+```
+
+Relasi:
+
+```text
+profiles.guru_id
+        ↓
+guru.id
+```
+
+---
+
+# 6. DATA KOMPETENSI KEAHLIAN
+
+### kompetensi_keahlian
+
+```text
+id UUID PRIMARY KEY
+kode TEXT UNIQUE
+nama TEXT
+aktif BOOLEAN DEFAULT TRUE
+created_at TIMESTAMP
+```
+
+Contoh data harus dimasukkan oleh Admin.
+
+Jangan mengarang daftar kompetensi keahlian sekolah.
+
+---
+
+# 7. DATA KELAS
+
+### kelas
+
+```text
+id UUID PRIMARY KEY
+nama_kelas TEXT
+tingkat INTEGER
+kompetensi_keahlian_id UUID
+tahun_pelajaran_id UUID
+wali_kelas_id UUID
+aktif BOOLEAN DEFAULT TRUE
+created_at TIMESTAMP
+```
+
+Relasi:
+
+```text
+kelas
+ ├── kompetensi_keahlian
+ ├── tahun_pelajaran
+ └── guru
+```
+
+---
+
+# 8. TAHUN PELAJARAN
+
+### tahun_pelajaran
+
+```text
+id UUID PRIMARY KEY
+nama TEXT
+tanggal_mulai DATE
+tanggal_selesai DATE
+semester_aktif TEXT
+aktif BOOLEAN DEFAULT FALSE
+created_at TIMESTAMP
+```
+
+Hanya satu tahun pelajaran yang boleh ditandai sebagai aktif.
+
+---
+
+# 9. DATA SISWA
+
+### siswa
+
+```text
+id UUID PRIMARY KEY
+nis TEXT UNIQUE
+nisn TEXT
+nama_lengkap TEXT
+jenis_kelamin TEXT
+tanggal_lahir DATE
+alamat TEXT
+nama_orang_tua TEXT
+no_hp_orang_tua TEXT
+kelas_id UUID
+kompetensi_keahlian_id UUID
+tahun_pelajaran_id UUID
+status TEXT
+created_at TIMESTAMP
+updated_at TIMESTAMP
+```
+
+Relasi:
+
+```text
+siswa
+ ├── kelas
+ ├── kompetensi_keahlian
+ └── tahun_pelajaran
+```
+
+Saat pengguna memilih siswa, sistem otomatis mengambil:
+
+```text
+NIS
+Kelas
+Kompetensi Keahlian
+Tahun Pelajaran
+```
+
+Jangan menginput ulang secara manual jika data sudah tersedia.
+
+---
+
+# 10. PENUGASAN GURU
+
+Buat tabel:
+
+### penugasan_guru
+
+```text
+id UUID PRIMARY KEY
+guru_id UUID
+role_id UUID
+kelas_id UUID NULL
+kompetensi_keahlian_id UUID NULL
+siswa_id UUID NULL
+tahun_pelajaran_id UUID
+aktif BOOLEAN DEFAULT TRUE
+created_at TIMESTAMP
+```
+
+Fungsi:
+
+### Guru Wali
+Dapat ditugaskan kepada siswa tertentu.
+
+### Wali Kelas
+Dapat ditugaskan kepada kelas tertentu.
+
+### KKK
+Dapat ditugaskan kepada kompetensi keahlian tertentu.
+
+### Guru BK
+Dapat memiliki kewenangan layanan BK sesuai penugasan.
+
+### Tim Kesiswaan
+Memiliki kewenangan sesuai konfigurasi Admin.
+
+---
+
+# 11. JURNAL GURU WALI
+
+Buat tabel:
+
+### jurnal_guru_wali
+
+```text
+id UUID PRIMARY KEY
+siswa_id UUID
+guru_id UUID
+tanggal DATE
+waktu TIME
+jenis_layanan TEXT
+permasalahan TEXT
+uraian_layanan TEXT
+hasil_layanan TEXT
+rencana_tindak_lanjut TEXT
+status TEXT
+dokumentasi_url TEXT NULL
+created_at TIMESTAMP
+updated_at TIMESTAMP
+```
+
+Kategori:
+
+```text
+Bimbingan
+Pembinaan
+Monitoring
+Konsultasi
+Layanan Kolaborasi BK & Kesiswaan
+```
+
+---
+
+# 12. JURNAL WALI KELAS
+
+### jurnal_wali_kelas
+
+```text
+id UUID PRIMARY KEY
+siswa_id UUID
+guru_id UUID
+kelas_id UUID
+tanggal DATE
+waktu TIME
+jenis_layanan TEXT
+permasalahan TEXT
+tindakan TEXT
+hasil TEXT
+tindak_lanjut TEXT
+status TEXT
+dokumentasi_url TEXT NULL
+created_at TIMESTAMP
+updated_at TIMESTAMP
+```
+
+Wali Kelas hanya dapat mengakses siswa dari kelas yang ditugaskan.
+
+---
+
+# 13. JURNAL KKK
+
+### jurnal_kkk
+
+```text
+id UUID PRIMARY KEY
+siswa_id UUID
+guru_id UUID
+kompetensi_keahlian_id UUID
+tanggal DATE
+waktu TIME
+jenis_kegiatan TEXT
+permasalahan TEXT
+tindakan TEXT
+hasil TEXT
+tindak_lanjut TEXT
+status TEXT
+dokumentasi_url TEXT NULL
+created_at TIMESTAMP
+updated_at TIMESTAMP
+```
+
+KKK hanya dapat mengakses siswa dalam kompetensi keahlian yang ditugaskan.
+
+---
+
+# 14. DATA LAYANAN BK
+
+### jurnal_bk
+
+```text
+id UUID PRIMARY KEY
+siswa_id UUID
+guru_bk_id UUID
+tanggal DATE
+waktu TIME
+jenis_layanan TEXT
+bidang_layanan TEXT
+tujuan_layanan TEXT
+identifikasi_kebutuhan TEXT
+intervensi TEXT
+hasil_layanan TEXT
+rencana_tindak_lanjut TEXT
+jadwal_berikutnya TIMESTAMP NULL
+status_layanan TEXT
+dokumentasi_url TEXT NULL
+created_at TIMESTAMP
+updated_at TIMESTAMP
+```
+
+Kategori:
+
+```text
+Pribadi
+Sosial
+Belajar
+Karier
+Konseling Individu
+Konseling Kelompok
+Bimbingan Klasikal
+Bimbingan Kelompok
+Konsultasi
+Mediasi
+Home Visit
+Rujukan
+```
+
+---
+
+# 15. DATA BK RAHASIA
+
+Jangan menyimpan catatan rahasia BK di tabel umum.
+
+Buat:
+
+### konseling_restricted
+
+```text
+id UUID PRIMARY KEY
+jurnal_bk_id UUID
+siswa_id UUID
+guru_bk_id UUID
+catatan_rahasia TEXT
+hasil_assessment TEXT
+rekomendasi_profesional TEXT
+created_at TIMESTAMP
+updated_at TIMESTAMP
+```
+
+Buat:
+
+### asesmen_bk_restricted
+
+```text
+id UUID PRIMARY KEY
+siswa_id UUID
+guru_bk_id UUID
+tanggal DATE
+jenis_asesmen TEXT
+hasil_asesmen TEXT
+catatan_profesional TEXT
+rekomendasi TEXT
+created_at TIMESTAMP
+updated_at TIMESTAMP
+```
+
+Buat:
+
+### rujukan_bk
+
+```text
+id UUID PRIMARY KEY
+siswa_id UUID
+guru_bk_id UUID
+tanggal DATE
+jenis_rujukan TEXT
+tujuan_rujukan TEXT
+alasan_rujukan TEXT
+status TEXT
+hasil_rujukan TEXT
+created_at TIMESTAMP
+updated_at TIMESTAMP
+```
+
+---
+
+# 16. ATURAN KEAMANAN BK
+
+Ini adalah aturan wajib.
+
+### HANYA GURU BK BERWENANG:
+
+```text
+SELECT
+INSERT
+UPDATE
+```
+
+terhadap:
+
+```text
+konseling_restricted
+asesmen_bk_restricted
+```
+
+Role lain:
+
+```text
+wali_kelas
+guru_wali
+kkk
+kesiswaan
+waka_kesiswaan
+kepala_sekolah
+admin
+```
+
+tidak boleh membaca isi tabel restricted.
+
+Admin database aplikasi juga tidak otomatis diberikan akses UI terhadap catatan rahasia.
+
+Untuk koordinasi, buat data ringkas seperti:
+
+```text
+Perlu tindak lanjut = TRUE
+Kategori = Monitoring
+Rekomendasi umum = Koordinasi dengan Wali Kelas
+Status = Berjalan
+```
+
+Jangan menyalin:
+
+```text
+catatan konseling
+hasil asesmen rahasia
+diagnosis
+catatan profesional
+```
+
+ke jurnal umum.
+
+---
+
+# 17. PELANGGARAN
+
+### pelanggaran
+
+```text
+id UUID PRIMARY KEY
+siswa_id UUID
+petugas_id UUID
+tanggal DATE
+waktu TIME
+jenis_pelanggaran_id UUID
+kategori TEXT
+poin INTEGER
+uraian TEXT
+tindakan_awal TEXT
+status TEXT
+created_at TIMESTAMP
+updated_at TIMESTAMP
+```
+
+Poin tidak boleh diketik sembarangan.
+
+Poin diambil dari:
+
+### master_poin_tatib
+
+```text
+id UUID PRIMARY KEY
+kode TEXT UNIQUE
+nama_pelanggaran TEXT
+kategori TEXT
+poin INTEGER
+deskripsi TEXT
+aktif BOOLEAN DEFAULT TRUE
+created_at TIMESTAMP
+updated_at TIMESTAMP
+```
+
+---
+
+# 18. PEMBINAAN
+
+### pembinaan_kesiswaan
+
+```text
+id UUID PRIMARY KEY
+siswa_id UUID
+petugas_id UUID
+pelanggaran_id UUID NULL
+tanggal DATE
+jenis_pembinaan TEXT
+uraian TEXT
+pihak_dilibatkan TEXT
+hasil TEXT
+rencana_tindak_lanjut TEXT
+status TEXT
+dokumentasi_url TEXT NULL
+created_at TIMESTAMP
+updated_at TIMESTAMP
+```
+
+---
+
+# 19. PEMANGGILAN ORANG TUA
+
+### surat_panggilan_ortu
+
+```text
+id UUID PRIMARY KEY
+siswa_id UUID
+petugas_id UUID
+nomor_surat TEXT
+tanggal DATE
+alasan TEXT
+jadwal DATE
+waktu TIME
+status TEXT
+hasil TEXT
+created_at TIMESTAMP
+```
+
+---
+
+# 20. BERITA ACARA
+
+### berita_acara
+
+```text
+id UUID PRIMARY KEY
+siswa_id UUID
+petugas_id UUID
+jenis TEXT
+nomor TEXT
+tanggal DATE
+isi TEXT
+status TEXT
+file_url TEXT NULL
+created_at TIMESTAMP
+```
+
+---
+
+# 21. KONTRAK PEMBINAAN
+
+### kontrak_pembinaan
+
+```text
+id UUID PRIMARY KEY
+siswa_id UUID
+petugas_id UUID
+tanggal_mulai DATE
+tanggal_selesai DATE
+isi_kesepakatan TEXT
+target TEXT
+status TEXT
+file_url TEXT NULL
+created_at TIMESTAMP
+updated_at TIMESTAMP
+```
+
+---
+
+# 22. KETERLAMBATAN
+
+### keterlambatan
+
+```text
+id UUID PRIMARY KEY
+siswa_id UUID
+tanggal DATE
+waktu TIME
+petugas_id UUID
+alasan TEXT
+tindakan TEXT
+status TEXT
+created_at TIMESTAMP
+```
+
+---
+
+# 23. KETIDAKHADIRAN
+
+### ketidakhadiran
+
+```text
+id UUID PRIMARY KEY
+siswa_id UUID
+tanggal DATE
+jenis TEXT
+keterangan TEXT
+petugas_id UUID
+created_at TIMESTAMP
+```
+
+Jenis:
+
+```text
+Sakit
+Izin
+Alpa
+Dispensasi
+```
+
+---
+
+# 24. PUSAT KOORDINASI SISWA
+
+Buat:
+
+### koordinasi_siswa
+
+```text
+id UUID PRIMARY KEY
+nomor_kasus TEXT UNIQUE
+siswa_id UUID
+pelapor_id UUID
+kategori_masalah TEXT
+tanggal_laporan DATE
+penanggung_jawab_id UUID
+target_penyelesaian DATE
+status TEXT
+informasi_koordinasi TEXT
+rekomendasi_umum TEXT
+created_at TIMESTAMP
+updated_at TIMESTAMP
+```
+
+Status:
+
+```text
+Baru
+Diproses
+Koordinasi
+Tindak Lanjut
+Monitoring
+Selesai
+```
+
+---
+
+# 25. PENUGASAN TINDAK LANJUT
+
+### penugasan_tindak_lanjut
+
+```text
+id UUID PRIMARY KEY
+koordinasi_id UUID
+ditugaskan_kepada UUID
+ditugaskan_oleh UUID
+tanggal_penugasan DATE
+target_penyelesaian DATE
+tugas TEXT
+hasil TEXT
+status TEXT
+created_at TIMESTAMP
+updated_at TIMESTAMP
+```
+
+---
+
+# 26. RIWAYAT STATUS KASUS
+
+### riwayat_status_kasus
+
+```text
+id UUID PRIMARY KEY
+koordinasi_id UUID
+status_lama TEXT
+status_baru TEXT
+diubah_oleh UUID
+catatan TEXT
+created_at TIMESTAMP
+```
+
+Semua perubahan status harus tercatat.
+
+---
+
+# 27. PRESTASI SISWA
+
+### prestasi_siswa
+
+```text
+id UUID PRIMARY KEY
+siswa_id UUID
+nama_prestasi TEXT
+tingkat TEXT
+kategori TEXT
+peringkat TEXT
+tanggal DATE
+penyelenggara TEXT
+keterangan TEXT
+dokumentasi_url TEXT NULL
+created_at TIMESTAMP
+```
+
+---
+
+# 28. OSIS / MPK
+
+### kegiatan_osis
+
+```text
+id UUID PRIMARY KEY
+nama_kegiatan TEXT
+jenis_organisasi TEXT
+tanggal_mulai DATE
+tanggal_selesai DATE
+penanggung_jawab TEXT
+deskripsi TEXT
+status TEXT
+dokumentasi_url TEXT NULL
+created_at TIMESTAMP
+```
+
+---
+
+# 29. EKSTRAKURIKULER
+
+### kegiatan_ekstrakurikuler
+
+```text
+id UUID PRIMARY KEY
+nama_ekstrakurikuler TEXT
+pembina_id UUID
+tanggal DATE
+kegiatan TEXT
+hasil TEXT
+dokumentasi_url TEXT NULL
+status TEXT
+created_at TIMESTAMP
+```
+
+---
+
+# 30. AUDIT LOG
+
+Buat:
+
+### audit_logs
+
+```text
+id UUID PRIMARY KEY
+user_id UUID
+action TEXT
+table_name TEXT
+record_id UUID NULL
+description TEXT
+created_at TIMESTAMP
+```
+
+Catat:
+
+- Login
+- Logout
+- Create
+- Read data sensitif
+- Update
+- Delete
+- Perubahan role
+- Perubahan RLS
+- Perubahan master poin
+- Akses catatan BK
+
+Audit log tidak boleh dapat dihapus melalui UI biasa.
+
+---
+
+# 31. NOTIFIKASI
+
+### notifications
+
+```text
+id UUID PRIMARY KEY
+user_id UUID
+judul TEXT
+pesan TEXT
+jenis TEXT
+referensi_id UUID NULL
+dibaca BOOLEAN DEFAULT FALSE
+created_at TIMESTAMP
+```
+
+Notifikasi harus menerapkan prinsip need-to-know.
+
+Jangan tampilkan isi konseling rahasia di notifikasi.
+
+Contoh:
+
+**BENAR**
+
+> Ada tindak lanjut siswa yang perlu diperiksa.
+
+**SALAH**
+
+> Siswa mengalami masalah pribadi karena ....
+
+---
+
+# 32. STORAGE
+
+Gunakan Supabase Storage.
+
+Buat bucket terpisah:
+
+```text
+documents
+evidence
+student-documents
+bk-restricted
+```
+
+Bucket:
+
+### bk-restricted
+
+harus memiliki akses sangat terbatas.
+
+Jangan membuat bucket BK menjadi public.
+
+Gunakan signed URL jika diperlukan.
+
+---
+
+# 33. RELASI DATABASE / ERD
+
+Bangun relasi utama:
+
+```text
+AUTH.USERS
+     │
+     ▼
+PROFILES
+     │
+     ▼
+GURU
+     │
+     ├──────── ROLE
+     │
+     └──────── PENUGASAN_GURU
+                       │
+                       ├── KELAS
+                       ├── KOMPETENSI_KEAHLIAN
+                       └── SISWA
+
+TAHUN_PELAJARAN
+       │
+       ▼
+     KELAS
+       │
+       ▼
+     SISWA
+       │
+       ├── JURNAL_GURU_WALI
+       ├── JURNAL_WALI_KELAS
+       ├── JURNAL_KKK
+       ├── JURNAL_BK
+       ├── PELANGGARAN
+       ├── PEMBINAAN
+       ├── KETERLAMBATAN
+       ├── KETIDAKHADIRAN
+       ├── PRESTASI
+       └── KOORDINASI_SISWA
+                    │
+                    ├── PENUGASAN_TINDAK_LANJUT
+                    └── RIWAYAT_STATUS_KASUS
+
+JURNAL_BK
+    │
+    └── KONSELING_RESTRICTED
+
+SISWA
+    │
+    └── ASESMEN_BK_RESTRICTED
+```
+
+Pastikan foreign key menggunakan UUID dan memiliki referential integrity.
+
+---
+
+# 34. RLS — PRINSIP UMUM
+
+Aktifkan RLS pada seluruh tabel yang berisi data operasional.
+
+Jangan mengandalkan frontend untuk keamanan.
+
+Frontend hanya menyembunyikan menu.
+
+Keamanan sebenarnya harus berasal dari:
+
+### PostgreSQL RLS.
+
+---
+
+# 35. RLS — GURU WALI
+
+Guru Wali hanya boleh:
+
+```text
+SELECT
+INSERT
+UPDATE
+```
+
+data siswa yang menjadi siswa dampingan berdasarkan:
+
+```text
+penugasan_guru
+```
+
+Tidak boleh mengakses siswa Guru Wali lain.
+
+---
+
+# 36. RLS — WALI KELAS
+
+Wali Kelas hanya boleh mengakses siswa:
+
+```text
+siswa.kelas_id
+=
+kelas yang ditugaskan kepada guru tersebut
+```
+
+Tidak boleh melihat jurnal wali kelas dari kelas lain.
+
+---
+
+# 37. RLS — KKK
+
+KKK hanya boleh mengakses siswa:
+
+```text
+siswa.kompetensi_keahlian_id
+=
+kompetensi keahlian yang ditugaskan
+```
+
+---
+
+# 38. RLS — GURU BK
+
+Guru BK dapat mengakses data layanan BK yang menjadi kewenangannya.
+
+Untuk tabel:
+
+```text
+jurnal_bk
+layanan_bk
+konseling_restricted
+asesmen_bk_restricted
+rujukan_bk
+```
+
+buat policy yang lebih ketat.
+
+Hanya Guru BK berwenang yang dapat membaca catatan restricted.
+
+---
+
+# 39. RLS — KESISWAAN
+
+Tim Kesiswaan dapat mengakses:
+
+```text
+pelanggaran
+master_poin_tatib
+pembinaan_kesiswaan
+keterlambatan
+ketidakhadiran
+surat_panggilan_ortu
+berita_acara
+kontrak_pembinaan
+prestasi_siswa
+kegiatan_osis
+kegiatan_ekstrakurikuler
+```
+
+sesuai kewenangan.
+
+---
+
+# 40. RLS — WAKA KESISWAAN
+
+Waka Kesiswaan dapat membaca data manajerial yang relevan.
+
+Namun:
+
+### JANGAN berikan akses otomatis ke:
+
+```text
+konseling_restricted
+asesmen_bk_restricted
+```
+
+Waka hanya mendapatkan:
+
+```text
+rekap layanan
+status tindak lanjut
+jumlah layanan
+kategori umum
+rekomendasi koordinasi
+```
+
+---
+
+# 41. RLS — KEPALA SEKOLAH
+
+Kepala Sekolah dapat membaca dashboard dan laporan manajerial sesuai kewenangan.
+
+Tidak boleh otomatis membaca catatan rahasia BK.
+
+---
+
+# 42. RLS — ADMIN
+
+Admin dapat mengelola:
+
+```text
+users
+roles
+guru
+siswa
+kelas
+kompetensi_keahlian
+tahun_pelajaran
+master_poin_tatib
+```
+
+Tetapi:
+
+### ADMIN TIDAK OTOMATIS MEMILIKI AKSES KE ISI KONSELING RAHASIA.
+
+Pisahkan administrative access dengan professional confidential access.
+
+---
+
+# 43. FUNGSI DATABASE UNTUK RLS
+
+Jika diperlukan, buat PostgreSQL helper functions seperti:
+
+```text
+get_current_user_role()
+is_admin()
+is_waka_kesiswaan()
+is_kepala_sekolah()
+is_guru_bk()
+is_kesiswaan()
+is_guru_wali()
+is_wali_kelas()
+is_kkk()
+is_student_in_assigned_class()
+is_student_in_assigned_competency()
+is_assigned_student()
+```
+
+Gunakan function tersebut dalam RLS policy agar policy tidak terlalu panjang dan mudah dipelihara.
+
+Gunakan `SECURITY DEFINER` hanya jika benar-benar diperlukan dan amankan `search_path`.
+
+---
+
+# 44. ALUR LOGIN
+
+Implementasikan:
+
+```text
+USER MEMBUKA APLIKASI
+        ↓
+HALAMAN LOGIN
+        ↓
+EMAIL + PASSWORD
+        ↓
+SUPABASE AUTH
+        ↓
+AUTH BERHASIL?
+    ↓ YA
+AMBIL PROFILE
+        ↓
+AMBIL ROLE
+        ↓
+AMBIL PENUGASAN
+        ↓
+CEK STATUS AKTIF
+        ↓
+DASHBOARD SESUAI ROLE
+```
+
+Jika tidak aktif:
+
+> Akun Anda belum aktif. Silakan hubungi Admin.
+
+Jika tidak memiliki role:
+
+> Role pengguna belum dikonfigurasi.
+
+---
+
+# 45. ROUTING
+
+Gunakan protected routes.
+
+Contoh:
+
+```text
+/login
+
+/dashboard
+
+/guru-wali/dashboard
+/guru-wali/jurnal
+
+/wali-kelas/dashboard
+/wali-kelas/jurnal
+
+/kkk/dashboard
+/kkk/jurnal
+
+/bk/dashboard
+/bk/konseli
+/bk/jurnal
+/bk/konseling
+
+/kesiswaan/dashboard
+/kesiswaan/pelanggaran
+/kesiswaan/pembinaan
+
+/koordinasi
+/koordinasi/:id
+
+/waka-kesiswaan/dashboard
+
+/kepala-sekolah/dashboard
+
+/admin/dashboard
+/admin/users
+/admin/master-data
+/admin/master-tatib
+/admin/audit-log
+```
+
+Jika user mencoba membuka URL role lain:
+
+```text
+403 Unauthorized
+```
+
+atau redirect ke dashboard masing-masing.
+
+---
+
+# 46. DASHBOARD
+
+Dashboard harus menyesuaikan role.
+
+## Guru Wali
+
+Card:
+
+- Siswa Dampingan
+- Jurnal Bulan Ini
+- Pembinaan
+- Koordinasi Aktif
+- Tindak Lanjut
+
+## Wali Kelas
+
+Card:
+
+- Jumlah Siswa
+- Kehadiran
+- Keterlambatan
+- Pembinaan
+- Kasus Aktif
+
+## KKK
+
+Card:
+
+- Siswa Kompetensi
+- Jurnal
+- Pelanggaran
+- Prestasi
+- Tindak Lanjut
+
+## Guru BK
+
+Card:
+
+- Konseli
+- Layanan Bulan Ini
+- Kasus Aktif
+- Jadwal Berikutnya
+- Rujukan
+
+## Tim Kesiswaan
+
+Card:
+
+- Pelanggaran
+- Keterlambatan
+- Pembinaan
+- Kasus Aktif
+- Prestasi
+
+## Waka Kesiswaan
+
+Card:
+
+- Total Siswa
+- Pelanggaran
+- Keterlambatan
+- Pembinaan
+- Kasus Aktif
+- Prestasi
+
+## Kepala Sekolah
+
+Dashboard strategis:
+
+- Kondisi ketertiban
+- Aktivitas layanan
+- Pembinaan
+- Prestasi
+- Kegiatan siswa
+
+---
+
+# 47. FORM INPUT
+
+Gunakan form reusable component.
+
+Contoh:
+
+```text
+<StudentSelect />
+
+<ClassAutoFill />
+
+<CompetencyAutoFill />
+
+<DatePicker />
+
+<TimePicker />
+
+<ServiceTypeSelect />
+
+<StatusSelect />
+
+<FileUpload />
+```
+
+Jangan membuat komponen form berbeda-beda jika fungsi sama.
+
+---
+
+# 48. SEARCH
+
+Global search minimal dapat mencari:
+
+- Nama siswa
+- NIS
+- Kelas
+- Kompetensi keahlian
+
+Tetapi hasil pencarian harus tetap mengikuti RLS.
+
+User tidak boleh menemukan data yang sebenarnya tidak boleh diakses.
+
+---
+
+# 49. REPORTING
+
+Buat laporan menggunakan query database yang aman.
+
+Contoh:
+
+```text
+Laporan layanan siswa
+Laporan BK
+Laporan pembinaan
+Laporan pelanggaran
+Laporan keterlambatan
+Laporan prestasi
+Laporan koordinasi
+```
+
+Filter:
+
+```text
+Tanggal
+Bulan
+Semester
+Tahun Pelajaran
+Kelas
+Kompetensi Keahlian
+Petugas
+Kategori
+Status
+```
+
+---
+
+# 50. DASHBOARD GRAFIK
+
+Gunakan grafik:
+
+### Line Chart
+Trend layanan per bulan.
+
+### Bar Chart
+Pelanggaran per kompetensi keahlian.
+
+### Donut Chart
+Kategori layanan siswa.
+
+### Bar Chart
+Keterlambatan per kompetensi keahlian.
+
+### Line Chart
+Pembinaan per bulan.
+
+### KPI Card
+Kasus aktif / selesai.
+
+Jangan menampilkan data rahasia BK dalam grafik publik/manajerial.
+
+---
+
+# 51. WORKFLOW UTAMA
+
+## WORKFLOW 1 — LAYANAN SISWA
+
+```text
+Guru Wali/Wali Kelas/KKK
+        ↓
+Input Layanan
+        ↓
+Simpan
+        ↓
+Riwayat Siswa
+        ↓
+Jika perlu koordinasi
+        ↓
+Pusat Koordinasi
+```
+
+---
+
+# 52. WORKFLOW 2 — BK
+
+```text
+Temuan/Rujukan
+      ↓
+Guru BK
+      ↓
+Asesmen
+      ↓
+Layanan
+      ↓
+Catatan BK Restricted
+      ↓
+Tindak Lanjut
+      ↓
+Monitoring
+      ↓
+Evaluasi
+      ↓
+Selesai
+```
+
+---
+
+# 53. WORKFLOW 3 — PELANGGARAN
+
+```text
+Pelanggaran
+     ↓
+Pilih Jenis Pelanggaran
+     ↓
+Poin otomatis
+     ↓
+Simpan
+     ↓
+Akumulasi Poin Siswa
+     ↓
+Pembinaan
+     ↓
+Tindak Lanjut
+     ↓
+Monitoring
+     ↓
+Selesai
+```
+
+---
+
+# 54. WORKFLOW 4 — KOORDINASI
+
+```text
+Temuan
+ ↓
+Identifikasi
+ ↓
+Buat Kasus
+ ↓
+Nomor Kasus Otomatis
+ ↓
+Tentukan Penanggung Jawab
+ ↓
+Notifikasi
+ ↓
+Tindakan
+ ↓
+Monitoring
+ ↓
+Evaluasi
+ ↓
+Selesai
+```
+
+---
+
+# 55. NOMOR KASUS OTOMATIS
+
+Buat nomor kasus seperti:
+
+```text
+KS-2026-000001
+KS-2026-000002
+KS-2026-000003
+```
+
+Nomor harus unik dan otomatis.
+
+---
+
+# 56. STORAGE SECURITY
+
+Jangan membuat dokumen siswa menjadi public jika berisi data pribadi.
+
+Gunakan:
+
+```text
+private bucket
++
+signed URL
+```
+
+Dokumen BK wajib menggunakan bucket private.
+
+---
+
+# 57. ERROR HANDLING
+
+Buat pesan error sederhana.
+
+Contoh:
+
+```text
+Data gagal disimpan.
+Silakan coba kembali.
+```
+
+atau:
+
+```text
+Anda tidak memiliki akses ke data ini.
+```
+
+Jangan menampilkan error database mentah kepada pengguna.
+
+---
+
+# 58. SOFT DELETE
+
+Untuk data penting, jangan langsung DELETE.
+
+Gunakan:
+
+```text
+deleted_at
+deleted_by
+```
+
+Jika diperlukan.
+
+Data dapat dinonaktifkan daripada benar-benar dihapus.
+
+---
+
+# 59. SEED DATA
+
+Buat seed data hanya untuk:
+
+- Roles
+- Status
+- Kategori
+- Struktur sistem
+
+Jangan membuat data siswa/guru fiktif sebagai data produksi.
+
+Admin akan memasukkan data sekolah sebenarnya.
+
+---
+
+# 60. MIGRATION
+
+Buat database migration yang terstruktur.
+
+Urutan:
+
+```text
+001_roles
+002_profiles
+003_guru
+004_tahun_pelajaran
+005_kompetensi_keahlian
+006_kelas
+007_siswa
+008_penugasan_guru
+009_jurnal_guru_wali
+010_jurnal_wali_kelas
+011_jurnal_kkk
+012_jurnal_bk
+013_bk_restricted
+014_master_tatib
+015_pelanggaran
+016_pembinaan
+017_kehadiran
+018_keterlambatan
+019_koordinasi
+020_tindak_lanjut
+021_prestasi
+022_osis
+023_ekstrakurikuler
+024_notifications
+025_audit_logs
+026_rls_policies
+```
+
+---
+
+# 61. REQUIREMENT PENTING UNTUK AI BUILDER
+
+Jangan hanya membuat UI prototype.
+
+Saya membutuhkan:
+
+### FULL FUNCTIONAL APPLICATION
+
+Artinya:
+
+- Database benar-benar terhubung
+- Login benar-benar berfungsi
+- CRUD benar-benar berfungsi
+- RLS benar-benar diterapkan
+- Role benar-benar membatasi akses
+- Data tersimpan di Supabase
+- Relasi database benar
+- Dashboard mengambil data nyata
+- Filter mengambil data nyata
+- Laporan mengambil data nyata
+- File upload menggunakan Supabase Storage
+- Audit Log berjalan
+- Notifikasi berjalan
+
+Jangan menggunakan dummy data sebagai sumber utama aplikasi.
+
+---
+
+# 62. PRIORITAS IMPLEMENTASI
+
+Jika pembangunan dilakukan bertahap, kerjakan dengan urutan:
+
+### FASE 1
+Authentication + Role + Database Master
+
+### FASE 2
+Data Siswa + Guru + Kelas + Kompetensi Keahlian
+
+### FASE 3
+Guru Wali + Wali Kelas + KKK
+
+### FASE 4
+Guru BK + Restricted Data
+
+### FASE 5
+Kesiswaan + Tata Tertib + Poin
+
+### FASE 6
+Pusat Koordinasi Siswa
+
+### FASE 7
+Dashboard Waka + Kepala Sekolah
+
+### FASE 8
+Laporan + Export
+
+### FASE 9
+Audit Log + Security Hardening
+
+---
+
+# 63. TESTING WAJIB
+
+Setelah aplikasi dibuat, lakukan pengujian role.
+
+## TEST 1
+
+Login Guru Wali.
+
+Pastikan:
+
+- Bisa melihat siswa dampingan.
+- Bisa membuat jurnal.
+- Tidak bisa melihat siswa Guru Wali lain.
+- Tidak bisa melihat catatan BK restricted.
+
+## TEST 2
+
+Login Wali Kelas.
+
+Pastikan hanya dapat melihat kelasnya.
+
+## TEST 3
+
+Login KKK.
+
+Pastikan hanya dapat melihat kompetensi keahliannya.
+
+## TEST 4
+
+Login Guru BK.
+
+Pastikan dapat membuka catatan restricted yang menjadi kewenangannya.
+
+## TEST 5
+
+Login Kesiswaan.
+
+Pastikan dapat mengelola pelanggaran dan pembinaan.
+
+## TEST 6
+
+Login Waka Kesiswaan.
+
+Pastikan dapat melihat dashboard manajerial tetapi tidak dapat membuka catatan konseling rahasia.
+
+## TEST 7
+
+Login Kepala Sekolah.
+
+Pastikan dapat melihat laporan strategis tetapi tidak otomatis melihat catatan konseling rahasia.
+
+## TEST 8
+
+Login Admin.
+
+Pastikan Admin dapat mengelola konfigurasi dan master data tetapi tidak otomatis dapat membaca catatan konseling restricted.
+
+---
+
+# 64. ACCEPTANCE CRITERIA
+
+Aplikasi dianggap berhasil apabila:
+
+[ ] Login bekerja
+
+[ ] Role bekerja
+
+[ ] Dashboard berbeda sesuai role
+
+[ ] Database Supabase aktif
+
+[ ] Relasi tabel benar
+
+[ ] CRUD berjalan
+
+[ ] RLS aktif
+
+[ ] Guru Wali hanya melihat siswa dampingannya
+
+[ ] Wali Kelas hanya melihat kelasnya
+
+[ ] KKK hanya melihat kompetensinya
+
+[ ] Guru BK dapat mengakses data BK sesuai kewenangan
+
+[ ] Data konseling rahasia terlindungi
+
+[ ] Kesiswaan dapat mengelola pelanggaran
+
+[ ] Poin otomatis dari master
+
+[ ] Koordinasi siswa berjalan
+
+[ ] Tindak lanjut berjalan
+
+[ ] Notifikasi berjalan
+
+[ ] Dashboard mengambil data nyata
+
+[ ] Audit log berjalan
+
+[ ] Storage aman
+
+[ ] Responsive
+
+[ ] Tidak ada akses lintas role yang tidak sah
+
+---
+
+# 65. ATURAN TERAKHIR
+
+Prioritaskan:
+
+### KEAMANAN DATA
+### KEMUDAHAN PENGGUNAAN
+### KETEPATAN RELASI DATABASE
+### RLS
+### PRIVASI BK
+### INTEGRASI ANTAR ROLE
+### KEMUDAHAN PEMELIHARAAN
+
+Jangan membuat sistem terlalu kompleks.
+
+Jangan membuat database duplikat.
+
+Jangan membuat aplikasi terpisah untuk setiap role.
+
+Gunakan:
+
+# ONE APPLICATION
+# ONE DATABASE
+# MULTIPLE ROLES
+# STRICT ACCESS CONTROL
+
+Nama aplikasi:
+
+# SIMPEL SMESA
+
+**Sistem Informasi Monitoring, Pendampingan, dan Evaluasi Siswa**
+
+**SMK NEGERI 1 JEMBER**
+
+Tagline:
+
+### “Data Terintegrasi • Layanan Terarah • Pembinaan Berkelanjutan”

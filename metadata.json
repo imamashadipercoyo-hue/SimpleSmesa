@@ -1,0 +1,6 @@
+{
+  "name": "SIMPEL SMESA — SMK Negeri 1 Jember",
+  "description": "Sistem Informasi Monitoring, Pendampingan, dan Evaluasi Siswa SMK Negeri 1 Jember. Terintegrasi Guru Wali, Wali Kelas, KKK, Guru BK, Kesiswaan, Waka, dan Kepala Sekolah.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
